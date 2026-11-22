@@ -25,6 +25,7 @@ import static com.android.nfc.NfcService.WAIT_FOR_OEM_CALLBACK_TIMEOUT_MS;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -842,6 +843,10 @@ class NfcDispatcher {
             return false;
         }
         Intent intent;
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
+        Bundle optionsBundle = options.toBundle();
 
         // NDEF
         if (message != null) {
@@ -849,7 +854,8 @@ class NfcDispatcher {
             if (intent != null &&
                     isFilterMatch(intent, overrideFilters, overrideTechLists != null)) {
                 try {
-                    overrideIntent.send(mContext, Activity.RESULT_OK, intent);
+                    overrideIntent.send(mContext, Activity.RESULT_OK, intent, null, null, null,
+                            optionsBundle);
                     if (DBG) Log.i(TAG, "tryOverrides: matched NDEF override");
                     return true;
                 } catch (CanceledException e) {
@@ -863,7 +869,8 @@ class NfcDispatcher {
         intent = dispatch.setTechIntent();
         if (isTechMatch(tag, overrideTechLists)) {
             try {
-                overrideIntent.send(mContext, Activity.RESULT_OK, intent);
+                overrideIntent.send(mContext, Activity.RESULT_OK, intent, null, null, null,
+                        optionsBundle);
                 if (DBG) Log.i(TAG, "tryOverrides: matched TECH override");
                 return true;
             } catch (CanceledException e) {
@@ -876,7 +883,8 @@ class NfcDispatcher {
         intent = dispatch.setTagIntent();
         if (isFilterMatch(intent, overrideFilters, overrideTechLists != null)) {
             try {
-                overrideIntent.send(mContext, Activity.RESULT_OK, intent);
+                overrideIntent.send(mContext, Activity.RESULT_OK, intent, null, null, null,
+                        optionsBundle);
                 if (DBG) Log.i(TAG, "tryOverrides: matched TAG override");
                 return true;
             } catch (CanceledException e) {
